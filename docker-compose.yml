@@ -1,0 +1,39 @@
+version: '3.9'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword  # Set your desired root password
+      MYSQL_DATABASE: main_data  # Your database name
+      MYSQL_USER: admin  # Set the username for MySQL
+      MYSQL_PASSWORD: password  # Set the password for the above user
+    volumes:
+      - db_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db  # Use the db service name
+      PMA_USER: admin  # Same as MYSQL_USER
+      PMA_PASSWORD: password  # Same as MYSQL_PASSWORD
+
+  web:
+    build: .  # Ensure Docker is building from the Dockerfile in the current directory
+    container_name: php
+    restart: always
+    ports:
+      - "8000:80"
+    volumes:
+      - ./public:/var/www/html
+    depends_on:
+      - db
+
+volumes:
+  db_data:

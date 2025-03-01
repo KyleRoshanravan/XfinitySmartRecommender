@@ -1,0 +1,17 @@
+/* styles.scss */
+
+/* Import Bootstrap's SCSS */
+@import 'node_modules/bootstrap/scss/bootstrap';
+
+/* Override the primary button color */
+$primary: #6138f5;
+
+.btn-primary {
+  background-color: $primary;
+  border-color: $primary;
+}
+
+.btn-primary:hover {
+  background-color: darken($primary, 10%);  /* Darken the primary color on hover */
+  border-color: darken($primary, 10%);
+}

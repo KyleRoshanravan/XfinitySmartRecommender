@@ -5,10 +5,63 @@
 <%- include('../views/header') %>
 
 <body>
-    <h2 id="responsive-text"></h2>
+    <div
+        style="
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        "
+        class="w-100 h-75"
+    >
+        <h2
+            id="responsive-text"
+            class="text-primary"
+            style="font-size: 72px; user-select: none; min-height: 90px"
+        ></h2>
+        <button class="btn btn-outline-primary">Try the AI Assistant</button>
+    </div>
+
+    <script src="/js/jquery.min.js"></script>
     <script>
-        import $ from "jquery";
-        $("#responsive-text").html("test");
+        let words = [
+            "Find the Best Internet Plan for you",
+            "Get the Best Deals Xfinity has to offer",
+            "Personalize the Products you want",
+        ];
+
+        let currentText = 0;
+        let lIndex = 0;
+        let isDeleting = false;
+        let typingSpeed = 100;
+        let deletingSpeed = 50;
+        let pauseBetweenWords = 3000;
+
+        function typeEffect() {
+            let currentWord = words[currentText];
+
+            if (!isDeleting) {
+                $("#responsive-text").html(currentWord.substring(0, lIndex++));
+                if (lIndex > currentWord.length) {
+                    isDeleting = true;
+                    setTimeout(typeEffect, pauseBetweenWords);
+                    return;
+                }
+            } else {
+                $("#responsive-text").html(currentWord.substring(0, lIndex--));
+                if (lIndex < 0) {
+                    isDeleting = false;
+                    currentText = (currentText + 1) % words.length;
+                }
+            }
+
+            setTimeout(typeEffect, isDeleting ? deletingSpeed : typingSpeed);
+        }
+
+        $(document).ready(function () {
+            typeEffect(); // Start the animation when the page loads
+        });
     </script>
 </body>
 

@@ -18,6 +18,12 @@ const openai = new OpenAI({
     apiKey: process.env.API_KEY,
 });
 
+import $ from "jquery";
+
+app.use("/js", express.static(__dirname + "/node_modules/jquery/dist"));
+
+app.locals.$ = $;
+
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
@@ -46,6 +52,14 @@ app.get("/main", (req, res) => {
 app.listen(port, () => {
     console.log(`Started server on port ${port}`);
 });
+
+// document.getElementById("Prompt").addEventListener("click", async () => {
+//     const prompt = document.getElementById("input").value;
+// });
+
+// if (prompt == NULL) {
+//     alert("No prompt found!");
+// }
 
 // Endpoint to handle the AI request
 app.post("/generate-haiku", async (req, res) => {

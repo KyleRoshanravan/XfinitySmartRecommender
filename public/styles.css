@@ -11857,4 +11857,15 @@ textarea.form-control-lg {
   border-color: rgb(61.004784689, 11.961722488, 238.038277512);
 }
 
+.chatbox {
+    width: 50wv;
+    height: 50vh;
+    background-color: aqua;
+    border: 2px solid red;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
 /*# sourceMappingURL=styles.css.map */

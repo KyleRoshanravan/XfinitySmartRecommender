@@ -1,12 +1,19 @@
 {
+  "name": "xfinity-smart-recommender",
+  "version": "1.0.0",
+  "type": "module",
   "dependencies": {
     "bootstrap": "^5.3.3",
+    "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
     "express": "^4.21.2",
     "expressjs": "^1.0.1",
+    "jquery": "^3.7.1",
     "material-ui": "^0.20.2",
     "nodemon": "^3.1.9",
+    "openai": "^4.86.1",
     "path": "^0.12.7",
+    "punycode": "^2.3.1",
     "scss": "^0.2.4"
   }
 }

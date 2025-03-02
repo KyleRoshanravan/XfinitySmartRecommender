@@ -12,12 +12,6 @@ const __dirname = path.dirname(__filename);
 import dotenv from "dotenv";
 dotenv.config();
 
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-    apiKey: process.env.API_KEY,
-});
-
 import $ from "jquery";
 
 app.use("/js", express.static(__dirname + "/node_modules/jquery/dist"));
@@ -53,25 +47,26 @@ app.listen(port, () => {
     console.log(`Started server on port ${port}`);
 });
 
-// document.getElementById("Prompt").addEventListener("click", async () => {
-//     const prompt = document.getElementById("input").value;
-// });
+app.use(express.json());
 
-// if (prompt == NULL) {
-//     alert("No prompt found!");
-// }
+import { GoogleGenerativeAI } from "@google/generative-ai";
+// Endpoint to handle POST request and call OpenAI API
+app.post("/generateResponse", async (req, res) => {
+    const { prompt } = req.body; // Get the prompt from the frontend
 
-// Endpoint to handle the AI request
-app.post("/generate-haiku", async (req, res) => {
+    const genAI = new GoogleGenerativeAI(process.env.API_KEY);
+
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
     try {
-        const completion = await openai.chat.completions.create({
-            model: "gpt-4",
-            messages: [{ role: "user", content: "write a haiku about AI" }],
-        });
+        const result = await model.generateContent(prompt);
+        // console.log(result.response.text());
 
-        res.json({ haiku: completion.choices[0].message.content });
+        res.json({ message: result.response.text() });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Failed to generate haiku" });
+        console.error("Error:", error);
+        res.status(500).json({
+            error: "Failed to generate response from OpenAI",
+        });
     }
 });

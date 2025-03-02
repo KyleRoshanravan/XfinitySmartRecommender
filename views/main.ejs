@@ -5,25 +5,188 @@
 <%- include('../views/header') %>
 
 <body>
-    <div class="chatbox w-full h-50">
-        <div class="mb-3 flex justify-content-center align-items-center">
-            <label for="" class="form-label">Prompt</label>
+    <div class="content">
+        <h1 class="text-primary" style="text-align: center">AI Assistant</h1>
+        <div class="chatbox w-full h-50">
             <div
-                class="mb-3 flex d-flex justify-content-center align-items-center"
+                id="chatbox"
+                style="width: 100%; overflow-x: hidden; overflow-y: auto"
             >
-                <input
-                    type="text"
-                    class="form-control px-3"
-                    name=""
-                    id="input"
-                    aria-describedby="helpId"
-                    placeholder="Example: Location, Price, # of Devices, etc.:  "
-                />
-                <button class="btn btn-primary mx-2" id="Prompt">Enter</button>
+                <!--Initially Empty chatbox-->
+            </div>
+            <div class="mb-3 flex justify-content-center align-items-center">
+                <label
+                    for="prompt"
+                    id="prompt-label"
+                    class="form-label px-4 w-sm-auto"
+                    style="float: left"
+                    >Prompt</label
+                >
+                <div
+                    class="mb-3 flex d-flex justify-content-center align-items-center"
+                    style="position: relative"
+                >
+                    <input
+                        type="text"
+                        class="form-control px-3"
+                        style="width: 90vw"
+                        name="prompt"
+                        id="input"
+                        aria-describedby="helpId"
+                        placeholder="Eg. &#34;I'm looking for a fast phone plan for 4 devices, and internet speeds for fast streaming.&#34;"
+                    />
+                    <div
+                        style="
+                            position: absolute;
+                            top: 50px;
+                            background-color: rgba(200, 200, 200, 1);
+                            width: 350px;
+                            height: 110px;
+                            font-size: 12px;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: flex-start;
+                            align-items: flex-start;
+                        "
+                        class="rounded flex p-2"
+                    >
+                        <div
+                            style="
+                                width: 100%;
+                                display: flex;
+                                flex-direction: row;
+                                justify-content: space-between;
+                            "
+                        >
+                            <p class="text-dark m-1">Walkthrough</p>
+                            <button
+                                class="btn btn-close"
+                                aria-label="Close"
+                                onclick="$(this).parent().parent().remove();"
+                            ></button>
+                        </div>
+                        <p
+                            class="text-dark m-1"
+                            style="text-align: start; opacity: 0.75"
+                        >
+                            Type prompts above, and our AI Assistant will try to
+                            answer your questions to the best of their
+                            abilities!
+                        </p>
+                    </div>
+                    <button class="btn btn-primary mx-2" id="sendPrompt">
+                        Send
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-    <script type="module" src="script.js"></script>
+    <script src="/js/jquery.min.js"></script>
+    <script src="https://js.puter.com/v2/"></script>
+    <script>
+        class Message {
+            constructor(type, message) {
+                this.type = type;
+                this.message = message;
+            }
+
+            showMessage() {
+                if (this.type == "AI") {
+                    //AI message
+                    return $(
+                        `<div class="message-container" style="justify-content: flex-start;"><div class="message rounded ai-message">${this.message}</div></div>`
+                    );
+                } else if (this.type == "prompt") {
+                    //Prompt message
+                    return $(
+                        `<div class="message-container" style="align-items: flex-end;"><div class="message rounded prompt-message">${this.message}</div></div>`
+                    );
+                }
+            }
+        }
+
+        function scrollToBottom() {
+            const chatContainer = document.getElementById("chatbox");
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        let welcomeMessage = new Message(
+            "AI",
+            "Hi there! How can I help you with your Xfinity questions today?"
+        );
+
+        $("#chatbox").append(welcomeMessage.showMessage());
+
+        // Memory storage for conversation history
+        let conversationHistory = [];
+
+        document
+            .getElementById("input")
+            .addEventListener("keydown", function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    document.getElementById("sendPrompt").click();
+                }
+            });
+
+        document
+            .getElementById("sendPrompt")
+            .addEventListener("click", async () => {
+                let userInput = $("#input").val();
+
+                $("#input").val("");
+
+                let userMessage = new Message("prompt", userInput);
+
+                $("#chatbox").append(userMessage.showMessage());
+                scrollToBottom();
+
+                conversationHistory.push(`User: ${userInput}`);
+
+                const prompt =
+                    "Goal: Help customers with their Xfinity product/service questions, help them find the best information for getting them these services. Keep responses short and sweet for the customer. Don't refer them to any external Xfinity websites, stores, and whatnot unless the user asks for the link; you must find the product and/or service the user is looking for, and provide them with information about it before sending them off. Additionally, dont ask for exact addresses; city is fine. If you don't know the price of things, refer the customer to a specific Xfinity website where they can find this pricing information. There is a button in the top right of the page that redirects to Xfinity's website. Tell the customer to click that if they need a link that you don't have. Provide as much information about the products as possible, and leave pricing towards the end. Lastly, don't refer to this in a technical manner, your responses are actually sent to the user, so the formatting here was generated for you to understand them better. Don't ever mention your name in your response (Gemini). If the customer doesn't know what to ask, suggest them a Xfinity product or service. Only say hi once.\n" +
+                    conversationHistory.join("\n") +
+                    `\nNew response prompt: ${userInput}`;
+
+                // console.log(prompt);
+
+                try {
+                    // Send the prompt to express
+                    const response = await fetch("/generateResponse", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ prompt }),
+                    });
+
+                    const data = await response.json();
+
+                    if (data.error) {
+                        $("#chatbox").append(
+                            `AI Response Error: ${data.error}. Please try again later, or visit Xfinity.com.`
+                        );
+                    } else {
+                        let AIMessage = new Message("AI", data.message);
+                        $("#chatbox").append(AIMessage.showMessage());
+                        conversationHistory.push(`Gemini: ${data.message}`);
+
+                        if (conversationHistory.length > 10) {
+                            conversationHistory =
+                                conversationHistory.slice(-10); // Keep only the last 10 interactions
+                        }
+                        // console.log("success! " + data.message);
+                    }
+                    scrollToBottom();
+                } catch (error) {
+                    console.error("Error:", error);
+                    $("#chatbox").append(
+                        "An internal error occurred, please try again later or visit Xfinity.com."
+                    );
+                    scrollToBottom();
+                }
+            });
+    </script>
 </body>
 
 <%- include('../views/footer') %>
